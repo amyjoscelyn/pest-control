@@ -37,6 +37,10 @@ class GameScene: SKScene
   {
     addChild(player)
     
+    let bug = Bug()
+    addChild(bug)
+    bug.position = CGPoint(x: 60, y: 0)
+    
     setupCamera()
     setupWorldPhysics()
   }
