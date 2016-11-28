@@ -116,6 +116,8 @@ extension GameScene : SKPhysicsContactDelegate
   func remove(bug: Bug)
   {
     bug.removeFromParent()
+    background.addChild(bug)
+    bug.die()
   }
   
   func didBegin(_ contact: SKPhysicsContact)
@@ -131,6 +133,14 @@ extension GameScene : SKPhysicsContactDelegate
       }
     default:
       break
+    }
+    
+    if let physicsBody = player.physicsBody
+    {
+      if physicsBody.velocity.length() > 0
+      {
+        player.checkDirection()
+      }
     }
   }
 }
