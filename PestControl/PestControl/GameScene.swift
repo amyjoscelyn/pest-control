@@ -38,10 +38,6 @@ class GameScene: SKScene
   {
     addChild(player)
     
-//    let bug = Bug()
-//    addChild(bug)
-//    bug.position = CGPoint(x: 60, y: 0)
-    
     setupCamera()
     setupWorldPhysics()
     createBugs()
@@ -79,6 +75,9 @@ class GameScene: SKScene
   func setupWorldPhysics()
   {
     background.physicsBody = SKPhysicsBody(edgeLoopFrom: background.frame)
+    background.physicsBody?.categoryBitMask = PhysicsCategory.Edge
+    
+    physicsWorld.contactDelegate = self
   }
   
   func tile(in tileMap: SKTileMapNode,
@@ -102,11 +101,36 @@ class GameScene: SKScene
         let bug = Bug()
         bug.position = bugsMap.centerOfTile(atColumn: column, row: row)
         bugsNode.addChild(bug)
+        bug.move()
       }
     }
     bugsNode.name = "Bugs"
     addChild(bugsNode)
     
     bugsMap.removeFromParent()
+  }
+}
+
+extension GameScene : SKPhysicsContactDelegate
+{
+  func remove(bug: Bug)
+  {
+    bug.removeFromParent()
+  }
+  
+  func didBegin(_ contact: SKPhysicsContact)
+  {
+    let other = contact.bodyA.categoryBitMask == PhysicsCategory.Player ? contact.bodyB : contact.bodyA
+    
+    switch other.categoryBitMask
+    {
+    case PhysicsCategory.Bug:
+      if let bug = other.node as? Bug
+      {
+        remove(bug: bug)
+      }
+    default:
+      break
+    }
   }
 }
