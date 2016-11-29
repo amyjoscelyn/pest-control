@@ -176,6 +176,36 @@ class GameScene: SKScene
     bugsprayTileMap?.name = "Bugspray"
     addChild(bugsprayTileMap!)
   }
+  
+  func tileCoordinates(in tileMap: SKTileMapNode,
+                       at position: CGPoint) -> TileCoordinates
+  {
+    let column = tileMap.tileColumnIndex(fromPosition: position)
+    let row = tileMap.tileRowIndex(fromPosition: position)
+    return (column, row)
+  }
+  
+  func updateBugspray()
+  {
+    guard let bugsprayTileMap = bugsprayTileMap else { return }
+    let (column, row) = tileCoordinates(in: bugsprayTileMap,
+                                        at: player.position)
+    if tile(in: bugsprayTileMap, at: (column, row)) != nil
+    {
+      bugsprayTileMap.setTileGroup(nil,
+                                   forColumn: column,
+                                   row: row)
+      player.hasBugspray = true
+    }
+  }
+  
+  override func update(_ currentTime: TimeInterval)
+  {
+    if !player.hasBugspray
+    {
+      updateBugspray()
+    }
+  }
 }
 
 extension GameScene : SKPhysicsContactDelegate
@@ -197,6 +227,15 @@ extension GameScene : SKPhysicsContactDelegate
       if let bug = other.node as? Bug
       {
         remove(bug: bug)
+      }
+    case PhysicsCategory.Firebug:
+      if player.hasBugspray
+      {
+        if let firebug = other.node as? Firebug
+        {
+          remove(bug: firebug)
+          player.hasBugspray = false
+        }
       }
     default:
       break
